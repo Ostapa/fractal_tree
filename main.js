@@ -17,6 +17,12 @@ function init() {
 
     scene.add(topLight, bottomLight);
 
+    drawBranch(scene, 1, new THREE.Vector3(0,0,0), new THREE.Vector3(0,10,0));
+
+    let plane = getPlane(50);
+    plane.rotation.x = Math.PI/2;
+    scene.add(plane);
+    
     // setup camera 
     let cameraGroup = new THREE.Group();
     let camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 1000);
@@ -43,6 +49,17 @@ function init() {
     return scene;
 }
 
+function drawBranch(scene, length, vectorFrom, vectorTo) {
+    let line = getLine(
+        vectorFrom, 
+        vectorTo);
+    scene.add(line);
+    vectorFrom = vectorTo;
+    if(length < 6) {
+        drawBranch(scene, length + 1, vectorFrom, 
+            new THREE.Vector3(vectorTo.x + 5, vectorTo.y + length * .5, 0));
+    }
+}
 
 function getPointLight(intensity, color) {
     let light = new THREE.PointLight(color, intensity);
@@ -63,6 +80,32 @@ function getSpotLight(intensity, color) {
     light.shadow.bias = 0.001;
 
     return light;
+}
+
+function getPlane(size) {
+    let geometry = new THREE.PlaneGeometry(size, size);
+    let material = new THREE.MeshPhongMaterial({
+        color: 'rgb(120, 120, 120)',
+        side: THREE.DoubleSide
+    });
+    let plane = new THREE.Mesh(geometry, material);
+    plane.receiveShadow = true;
+
+    return plane;
+}
+
+function getLine(vectorFrom, vectorTo) {
+    let material = new THREE.LineBasicMaterial({
+        color: 'rgb(255, 51, 51)'
+    });
+    
+    let geo = new THREE.Geometry();
+    geo.vertices.push(
+        vectorFrom,
+        vectorTo
+    );
+    let line = new THREE.Line(geo, material);
+    return line;
 }
 
 function update(renderer, scene, camera, stats, controls) {
